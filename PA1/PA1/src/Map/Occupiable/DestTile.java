@@ -1,6 +1,7 @@
 package Map.Occupiable;
 
 import Map.Occupant.Crate;
+import Map.Occupant.Occupant;
 
 import java.nio.file.DirectoryStream;
 import java.util.function.Function;
@@ -23,8 +24,13 @@ public class DestTile extends Tile {
      * is currently occupying this tile.
      */
     public boolean isCompleted() {
-        //TODO
-        return false; // You may also modify this line.
+        if (getOccupant().isPresent()
+                && getOccupant().get() instanceof Crate) {
+            return Character.toUpperCase(((Crate)getOccupant().get())
+                    .getID()) == getDestID();
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -36,7 +42,8 @@ public class DestTile extends Tile {
 
     @Override
     public char getRepresentation() {
-        //TODO
-        return ' '; // You may also modify this line.
+        return getOccupant().isPresent()
+                ? ((Occupant)getOccupant().get()).getRepresentation()
+                : destID;
     }
 }
