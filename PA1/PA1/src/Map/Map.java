@@ -32,8 +32,57 @@ public class Map {
      * @throws InvalidMapException Throw the correct exception when necessary. There should only be 1 player.
      */
     public void initialize(int rows, int cols, char[][] rep) throws InvalidMapException {
-        //TODO
+        cells = new Cell[rows][cols];
+        destTiles = new ArrayList<>();
+        crates = new ArrayList<>();
+        player = null;
 
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Tile tile;
+                switch (rep[i][j]) {
+                    // Case: Wall
+                    case '#':
+                        cells[i][j] = new Wall();
+                        break;
+                    // Case: Tile
+                    case '.':
+                        cells[i][j] = new Tile();
+                        break;
+                    // Case: Player
+                    // Error if player already exists in map
+                    case '@':
+                        if (player != null) {
+                            throw new InvalidNumberOfPlayersException(">1 players found!");
+                        }
+
+                        player = new Player(i, j);
+                        tile = new Tile();
+                        tile.setOccupant(player);
+                        cells[i][j] = tile;
+                        break;
+                    default:
+                        // Case: Crate
+                        if (Character.isLowerCase(rep[i][j])) {
+                            tile = new Tile();
+                            Crate crate = new Crate(i, j, rep[i][j]);
+                            tile.setOccupant(crate);
+                            cells[i][j] = tile;
+                            crates.add(crate);
+                        } // Case: DestTile
+                        else if (Character.isUpperCase(rep[i][j])) {
+                            cells[i][j] = new DestTile(rep[i][j]);
+                            destTiles.add((DestTile) cells[i][j]);
+                        } else { // Case: Others
+                            throw new UnknownElementException("Unknown char: " + rep[i][j]);
+                        }
+                }
+            }
+        }
+
+        if (player == null) {
+            throw new InvalidNumberOfPlayersException("0 players found!");
+        }
     }
 
     public ArrayList<DestTile> getDestTiles() {
@@ -57,8 +106,50 @@ public class Map {
      * @return Whether the move was successful
      */
     public boolean movePlayer(Direction d) {
-        //TODO
-        return false; // You may also modify this line.
+        int r = player.getR();
+        int c = player.getC();
+        int destR = r;
+        int destC = c;
+
+        switch (d) {
+            case UP:
+                destR = r-1;
+                break;
+            case DOWN:
+                destR = r+1;
+                break;
+            case LEFT:
+                destC = c-1;
+                break;
+            case RIGHT:
+                destC = c+1;
+                break;
+        }
+
+        if (isValid(destR, destC)) {
+            // Valid and occupiable and no crate
+            if (isOccupiableAndNotOccupiedWithCrate(destR, destC)) {
+                ((Tile) cells[destR][destC]).setOccupant(player);
+                ((Tile) cells[r][c]).removeOccupant();
+                player.setPos(destR, destC);
+                return true;
+            }
+
+            // Valid and occupiable but has crate
+            if (cells[destR][destC] instanceof Tile) {
+                Crate crate = (Crate) ((Tile) cells[destR][destC]).getOccupant().get();
+
+                if (moveCrate(crate, d)) {
+                    ((Tile) cells[destR][destC]).setOccupant(player);
+                    ((Tile) cells[r][c]).removeOccupant();
+                    player.setPos(destR, destC);
+                } else {
+                    return false;
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -70,8 +161,36 @@ public class Map {
      * @return Whether or not the move was successful
      */
     private boolean moveCrate(Crate c, Direction d) {
-        //TODO
-        return false; // You may also modify this line.
+        int row = c.getR();
+        int col = c.getC();
+
+        int destR = row;
+        int destC = col;
+
+        switch (d) {
+            case UP:
+                destR = row-1;
+                break;
+            case DOWN:
+                destR = row+1;
+                break;
+            case LEFT:
+                destC = col-1;
+                break;
+            case RIGHT:
+                destC = col+1;
+                break;
+        }
+
+        if (isValid(destR, destC) &&
+                isOccupiableAndNotOccupiedWithCrate(destR, destC)) {
+            ((Tile) cells[destR][destC]).setOccupant(c);
+            ((Tile) cells[row][col]).removeOccupant();
+            c.setPos(destR, destC);
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isValid(int r, int c) {
@@ -85,8 +204,10 @@ public class Map {
      * yet does not currently have a crate in it. Will return false if out of bounds.
      */
     public boolean isOccupiableAndNotOccupiedWithCrate(int r, int c) {
-        //TODO
-        return false; // You may also modify this line.
+        return isValid(r, c)
+                && cells[r][c] instanceof Tile
+                && !(((Tile) cells[r][c]).getOccupant().isPresent()
+                    && ((Tile) cells[r][c]).getOccupant().get() instanceof Crate);
     }
 
     public enum Direction {
