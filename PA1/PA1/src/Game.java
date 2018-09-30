@@ -1,5 +1,6 @@
 
 import Exceptions.InvalidMapException;
+import Exceptions.InvalidSizeMapException;
 import Map.*;
 import Map.Occupant.Crate;
 import Map.Occupiable.DestTile;
@@ -26,8 +27,44 @@ public class Game {
      * @throws InvalidMapException
      */
     public void loadMap(String filename) throws InvalidMapException {
-        //TODO
+        File file = new File(filename);
 
+        try {
+            Scanner sc = new Scanner(file);
+
+            m = new Map();
+            numRows = sc.nextInt();
+            numCols = sc.nextInt();
+            rep = new char[numRows][numCols];
+
+            System.out.println(numRows);
+            System.out.println(numCols);
+
+            int r = -1;
+            while (sc.hasNext()) {
+                String line = sc.next();
+                r++;
+
+                if (r >= numRows) {
+                    throw new InvalidSizeMapException("Map has wrong number of rows");
+                }
+                if (line.length() != numCols) {
+                    throw new InvalidSizeMapException("Map has wrong number of columns");
+                }
+
+                for (int c = 0; c < numCols; c++) {
+                    rep[r][c] = line.charAt(c);
+                }
+            }
+
+            if (r < numRows-1) {
+                throw new InvalidSizeMapException("Map has wrong number of rows");
+            }
+            sc.close();
+            m.initialize(numRows, numCols, rep);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -35,8 +72,12 @@ public class Game {
      * @return Whether or not the win condition has been satisfied
      */
     public boolean isWin() {
-        //TODO
-        return false; // You may also modify this line.
+        for (DestTile tile: m.getDestTiles()) {
+            if (! tile.isCompleted()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -45,16 +86,38 @@ public class Game {
      * @return Whether deadlock has occurred
      */
     public boolean isDeadlocked() {
-        //TODO
-        return false; // You may also modify this line.
+        for (Crate crate: m.getCrates()) {
+            if (canMove(crate)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean canMove(Crate crate) {
+        int r = crate.getR();
+        int c = crate.getC();
+
+        if ((m.isOccupiableAndNotOccupiedWithCrate(r+1, c)
+            && m.isOccupiableAndNotOccupiedWithCrate(r-1, c))
+            || m.isOccupiableAndNotOccupiedWithCrate(r, c+1)
+            && m.isOccupiableAndNotOccupiedWithCrate(r, c-1)) {
+            return true;
+        }
+        return false;
     }
 
     /**
      * Print the map to console
      */
     public void display() {
-        //TODO
-
+        for (int r = 0; r < numRows; r++) {
+            for (int c = 0; c < numCols; c++) {
+                System.out.print(m.getCells()[r][c].getRepresentation());
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
     /**
@@ -67,9 +130,20 @@ public class Game {
      * @return Whether or not the move was successful
      */
     public boolean makeMove(char c) {
-        //TODO
-        return false; // You may also modify this line.
+        switch (c) {
+            case 'w':
+                return m.movePlayer(Map.Direction.UP);
+            case 'a':
+                return m.movePlayer(Map.Direction.LEFT);
+            case 's':
+                return m.movePlayer(Map.Direction.DOWN);
+            case 'd':
+                return m.movePlayer(Map.Direction.RIGHT);
+            case 'r':
+                try { m.initialize(numRows, numCols, rep); } catch (InvalidMapException e) {}
+                return true;
+            default:
+                return false;
+        }
     }
-
-
 }
