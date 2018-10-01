@@ -1,6 +1,7 @@
 package Map.Occupiable;
 
 import Map.Occupant.Crate;
+import Map.Occupant.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,5 +22,15 @@ class TileTest {
         t.setOccupant(crate);
         assertTrue(t.getOccupant().isPresent());
         assertSame(crate, t.getOccupant().get());
+    }
+
+    @Test
+    void shouldReturnRepresentation() {
+        t.setOccupant(null);
+        assertEquals('.', t.getRepresentation());
+        t.setOccupant(crate);
+        assertEquals('a', t.getRepresentation());
+        t.setOccupant(new Player(0, 0));
+        assertEquals('@', t.getRepresentation());
     }
 }

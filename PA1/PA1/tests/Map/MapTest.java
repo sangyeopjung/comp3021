@@ -36,4 +36,70 @@ class MapTest {
     void getDestTiles() {
         assertEquals(2, m.getDestTiles().stream().filter(x -> "AB".contains("" + x.getRepresentation())).count());
     }
+
+    @Test
+    void shouldThrowUnknownElementException() {
+        char[][] badMap = {
+                {'#', '#', '#', '#', '#', '#'},
+                {'#', '.', ')', '.', '.', '#'},
+                {'.', '@', '.', 'a', 'b', '#'},
+                {'#', '.', '.', 'A', 'B', '#'},
+                {'#', '#', '#', '#', '#', '#'},
+        };
+
+        assertThrows(UnknownElementException.class, () -> m.initialize(rows, cols, badMap));
+    }
+
+    @Test
+    void shouldThrowInvalidNumberOfPlayersExceptionWhenNoPlayers() {
+        char[][] badMapNoPlayers = {
+                {'#', '#', '#', '#', '#', '#'},
+                {'#', '.', '.', '.', '.', '#'},
+                {'.', '.', '.', 'a', 'b', '#'},
+                {'#', '.', '.', 'A', 'B', '#'},
+                {'#', '#', '#', '#', '#', '#'},
+        };
+
+        m = new Map();
+        assertThrows(InvalidNumberOfPlayersException.class, () -> m.initialize(rows, cols, badMapNoPlayers));
+    }
+
+    @Test
+    void shouldThrowInvalidNumberOfPlayersExceptionWhenMultiplePlayers() {
+        char[][] badMapTooMany = {
+                {'#', '#', '#', '#', '#', '#'},
+                {'#', '.', '.', '.', '.', '#'},
+                {'.', '@', '@', 'a', 'b', '#'},
+                {'#', '.', '.', 'A', 'B', '#'},
+                {'#', '#', '#', '#', '#', '#'},
+        };
+
+        m = new Map();
+        assertThrows(InvalidNumberOfPlayersException.class, () -> m.initialize(rows, cols, badMapTooMany));
+    }
+
+    @Test
+    void shouldMovePlayer() {
+        assertTrue(m.movePlayer(Map.Direction.DOWN));
+        assertTrue(m.movePlayer(Map.Direction.RIGHT));
+        assertTrue(m.movePlayer(Map.Direction.RIGHT));
+        assertTrue(m.movePlayer(Map.Direction.UP));
+    }
+
+    @Test
+    void shouldNotMovePlayer() throws InvalidMapException {
+        char[][] map = {
+                {'#', '#', 'd', '#', '#', '#'},
+                {'#', '.', 'd', '.', '.', '#'},
+                {'a', 'a', '@', 'c', 'c', '#'},
+                {'#', '.', 'b', 'A', 'B', '#'},
+                {'#', '#', 'b', '#', '#', '#'},
+        };
+
+        m.initialize(rows, cols, map);
+        assertFalse(m.movePlayer(Map.Direction.LEFT));
+        assertFalse(m.movePlayer(Map.Direction.RIGHT));
+        assertFalse(m.movePlayer(Map.Direction.UP));
+        assertFalse(m.movePlayer(Map.Direction.DOWN));
+    }
 }
