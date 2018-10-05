@@ -29,9 +29,9 @@ public class Game {
     public void loadMap(String filename) throws InvalidMapException {
         File file = new File(filename);
 
-        try {
-            Scanner sc = new Scanner(file);
-
+        try (
+            Scanner sc = new Scanner(file)
+        ){
             m = new Map();
             numRows = sc.nextInt();
             numCols = sc.nextInt();
