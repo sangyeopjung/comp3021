@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -55,6 +57,17 @@ public class LevelManager {
      */
     public void loadLevelNamesFromDisk() {
         //TODO
+        try {
+            levelNames.clear();
+            List<String> paths = Files.walk(Paths.get(mapDirectory), 1).map(Path::toString).filter(p->p.contains(".txt")).sorted().collect(Collectors.toList());
+            for (int i = 0; i < paths.size(); i++) {
+                String[] a = paths.get(i).split("/");
+                paths.set(i, a[a.length-1]);
+            }
+            levelNames.addAll(paths);
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public ObservableList<String> getLevelNames() {
@@ -77,6 +90,10 @@ public class LevelManager {
      */
     public void setLevel(String levelName) throws InvalidMapException {
         //TODO
+        curLevelNameProperty.setValue(levelName);
+        curGameLevelExistedDuration.set(0);
+        gameLevel.numPushesProperty().setValue(0);
+        gameLevel.loadMap(mapDirectory + "/" + levelName);
     }
 
     /**
@@ -87,6 +104,12 @@ public class LevelManager {
      */
     public void startLevelTimer() {
         //TODO
+        t.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> curGameLevelExistedDuration.set(curGameLevelExistedDuration.get() + 1));
+            }
+        }, 1000, 1000);
     }
 
     /**
@@ -117,8 +140,12 @@ public class LevelManager {
      * name is always valid.
      */
     public String getNextLevelName() {
-        //TODO
-        return null;//NOTE: You may also change this line
+        int ind = levelNames.indexOf(curLevelNameProperty.getValue());
+        if (ind == levelNames.size()-1) {
+            return null;
+        } else {
+            return levelNames.get(ind+1);
+        }
     }
 
     public IntegerProperty curGameLevelExistedDurationProperty() {
