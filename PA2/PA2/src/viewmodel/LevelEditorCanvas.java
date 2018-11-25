@@ -33,6 +33,8 @@ public class LevelEditorCanvas extends Canvas {
      */
     public LevelEditorCanvas(int rows, int cols) {
         //TODO
+        super(cols*LEVEL_EDITOR_TILE_SIZE, rows*LEVEL_EDITOR_TILE_SIZE);
+        changeSize(rows, cols);
     }
 
     /**
@@ -56,6 +58,17 @@ public class LevelEditorCanvas extends Canvas {
      */
     private void resetMap(int rows, int cols) {
         //TODO
+        map = new Brush[rows][cols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                map[i][j] = Brush.TILE;
+            }
+        }
+
+        oldPlayerRow = -1;
+        oldPlayerCol = -1;
+        renderCanvas();
     }
 
     /**
@@ -63,6 +76,7 @@ public class LevelEditorCanvas extends Canvas {
      */
     private void renderCanvas() {
         //TODO
+        MapRenderer.render(this, map);
     }
 
     /**
@@ -86,6 +100,24 @@ public class LevelEditorCanvas extends Canvas {
      */
     public void setTile(Brush brush, double x, double y) {
         //TODO
+        int row = (int) y/LEVEL_EDITOR_TILE_SIZE;
+        int col = (int) x/LEVEL_EDITOR_TILE_SIZE;
+
+        if (brush.toString().contains("Player")) {
+            if (oldPlayerRow != -1) {
+                Brush b = map[oldPlayerRow][oldPlayerCol];
+                if (b.rep == Brush.PLAYER_ON_TILE.rep) {
+                    b = Brush.TILE;
+                } else if (b.rep == Brush.PLAYER_ON_DEST.rep) {
+                    b = Brush.DEST;
+                }
+                map[oldPlayerRow][oldPlayerCol] = b;
+            }
+            oldPlayerRow = row;
+            oldPlayerCol = col;
+        }
+        map[row][col] = brush;
+        renderCanvas();
     }
 
     /**
@@ -94,6 +126,25 @@ public class LevelEditorCanvas extends Canvas {
      */
     public void saveToFile() {
         //TODO
+        if (isInvalidMap()) {
+            return;
+        }
+
+        File file = getTargetSaveDirectory();
+
+        try (PrintWriter writer = new PrintWriter(file)) {
+            writer.print(rows);
+            writer.println();
+            writer.print(cols);
+            for (int i = 0; i < rows; i++) {
+                writer.println();
+                for (int j = 0; j < cols; j++) {
+                    writer.print(map[i][j].rep);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -105,7 +156,9 @@ public class LevelEditorCanvas extends Canvas {
      */
     private File getTargetSaveDirectory() {
         //TODO
-        return null;//NOTE: You may also need to modify this line
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Normal text file", "*.txt"));
+        return fileChooser.showSaveDialog(SceneManager.getInstance().getStage());
     }
 
     /**
@@ -122,7 +175,42 @@ public class LevelEditorCanvas extends Canvas {
      */
     private boolean isInvalidMap() {
         //TODO
-        return true;//NOTE: You may also need to modify this line
+        if (rows < 3 || cols < 3) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid Map");
+            alert.show();
+            return true;
+        }
+
+        int numPlayer = 0;
+        int numCrates = 0;
+        int numDest = 0;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                char rep = map[i][j].rep;
+                if (rep == Brush.CRATE_ON_DEST.rep) {
+                    numCrates++;
+                    numDest++;
+                } else if (rep == Brush.CRATE_ON_TILE.rep) {
+                    numCrates++;
+                } else if (rep == Brush.PLAYER_ON_DEST.rep) {
+                    numDest++;
+                    numPlayer++;
+                } else if (rep == Brush.PLAYER_ON_TILE.rep) {
+                    numPlayer++;
+                } else if (rep == Brush.DEST.rep) {
+                    numDest++;
+                }
+            }
+        }
+
+        if (numPlayer != 1 || numCrates != numDest || numCrates == 0 || numDest == 0) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Invalid Map");
+            alert.show();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

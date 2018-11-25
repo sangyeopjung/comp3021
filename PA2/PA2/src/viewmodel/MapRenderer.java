@@ -50,6 +50,36 @@ public class MapRenderer {
      */
     static void render(Canvas canvas, LevelEditorCanvas.Brush[][] map) {
         //TODO
+        int row = map.length;
+        int col = map.length > 0 ? map[0].length : 0;
+
+        canvas.setHeight(row*LEVEL_EDITOR_TILE_SIZE);
+        canvas.setWidth(col*LEVEL_EDITOR_TILE_SIZE);
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                Image image;
+                char rep = map[i][j].getRep();
+                if (rep == LevelEditorCanvas.Brush.CRATE_ON_TILE.getRep()) {
+                    image = crateOnTile;
+                } else if (rep == LevelEditorCanvas.Brush.CRATE_ON_DEST.getRep()) {
+                    image = crateOnDest;
+                } else if (rep == LevelEditorCanvas.Brush.PLAYER_ON_TILE.getRep()) {
+                    image = playerOnTile;
+                } else if (rep == LevelEditorCanvas.Brush.PLAYER_ON_DEST.getRep()) {
+                    image = playerOnDest;
+                } else if (rep == LevelEditorCanvas.Brush.DEST.getRep()) {
+                    image = dest;
+                } else if (rep == LevelEditorCanvas.Brush.TILE.getRep()) {
+                    image = tile;
+                } else {
+                    image = wall;
+                }
+                gc.drawImage(image, j*LEVEL_EDITOR_TILE_SIZE, i*LEVEL_EDITOR_TILE_SIZE);
+            }
+        }
     }
 
     /**
@@ -62,5 +92,43 @@ public class MapRenderer {
      */
     public static void render(Canvas canvas, Cell[][] map) {
         //TODO
+        int row = map.length;
+        int col = map.length > 0 ? map[0].length : 0;
+
+        canvas.setHeight(row*LEVEL_EDITOR_TILE_SIZE);
+        canvas.setWidth(col*LEVEL_EDITOR_TILE_SIZE);
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                Image image;
+                Cell rep = map[i][j];
+                if (rep instanceof DestTile) {
+                    if (((DestTile)rep).getOccupant().isPresent()) {
+                        if (((DestTile)rep).getOccupant().get() instanceof Player) {
+                            image = playerOnDest;
+                        } else {
+                            image = crateOnDest;
+                        }
+                    } else {
+                        image = dest;
+                    }
+                } else if (rep instanceof Occupiable) {
+                    if (((Occupiable)rep).getOccupant().isPresent()) {
+                        if (((Occupiable)rep).getOccupant().get() instanceof Player) {
+                            image = playerOnTile;
+                        } else {
+                            image = crateOnTile;
+                        }
+                    } else {
+                        image = tile;
+                    }
+                } else {
+                    image = wall;
+                }
+                gc.drawImage(image, j*LEVEL_EDITOR_TILE_SIZE, i*LEVEL_EDITOR_TILE_SIZE);
+            }
+        }
     }
 }

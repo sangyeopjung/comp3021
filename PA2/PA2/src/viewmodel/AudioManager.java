@@ -46,6 +46,15 @@ public class AudioManager {
      */
     private void playFile(String name) {
         //TODO
+        if (enabled) {
+            MediaPlayer mediaPlayer = new MediaPlayer(new Media(AudioManager.class.getResource("/assets/audio/"+name+".mp3").toExternalForm()));
+            soundPool.add(mediaPlayer);
+            mediaPlayer.setOnEndOfMedia(() -> {
+                soundPool.remove(mediaPlayer);
+                mediaPlayer.dispose();
+            });
+            mediaPlayer.play();
+        }
     }
 
     public void playMoveSound() {
