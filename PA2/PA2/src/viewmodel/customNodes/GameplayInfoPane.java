@@ -67,6 +67,32 @@ public class GameplayInfoPane extends VBox {
      *                            has restarted the current level
      */
     private void bindTo(StringProperty levelNameProperty, IntegerProperty timerProperty, IntegerProperty numMovesProperty, IntegerProperty numRestartsProperty) {
-        //TODO
+        levelNameLabel.textProperty().bind(
+                Bindings.createStringBinding(
+                        () -> "Level: " + levelNameProperty.get(),
+                        levelNameProperty
+                )
+        );
+
+        timerLabel.textProperty().bind(
+                Bindings.createStringBinding(
+                        () -> "Time: " + format(timerProperty.get()),
+                        timerProperty
+                )
+        );
+
+        numMovesLabel.textProperty().bind(
+                Bindings.createStringBinding(
+                        () -> "Moves: " + Integer.toString(numMovesProperty.get()),
+                        numMovesProperty
+                )
+        );
+
+        numRestartsLabel.textProperty().bind(
+                Bindings.createStringBinding(
+                        () -> "Restarts: " + Integer.toString(numRestartsProperty.get()),
+                        numRestartsProperty
+                )
+        );
     }
 }
