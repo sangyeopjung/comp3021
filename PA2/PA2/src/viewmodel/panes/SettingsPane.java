@@ -27,6 +27,15 @@ public class SettingsPane extends BorderPane {
      */
     public SettingsPane() {
         //TODO
+        leftContainer = new VBox(20);
+        returnButton = new Button("Return");
+        toggleSoundFXButton = new Button(AudioManager.getInstance().isEnabled() ? "Disable sound" : "Enable sound");
+        centerContainer = new VBox();
+        infoText = new TextArea(Config.getAboutText());
+
+        connectComponents();
+        styleComponents();
+        setCallbacks();
     }
 
     /**
@@ -34,6 +43,11 @@ public class SettingsPane extends BorderPane {
      */
     private void connectComponents() {
         //TODO
+        leftContainer.getChildren().addAll(returnButton, toggleSoundFXButton);
+        centerContainer.getChildren().addAll(infoText);
+
+        this.setLeft(leftContainer);
+        this.setCenter(centerContainer);
     }
 
     /**
@@ -43,6 +57,13 @@ public class SettingsPane extends BorderPane {
      */
     private void styleComponents() {
         //TODO
+        this.getStylesheets().add(Config.CSS_STYLES);
+        leftContainer.getStyleClass().add("side-menu");
+        returnButton.getStyleClass().add("big-button");
+        toggleSoundFXButton.getStyleClass().add("big-button");
+        centerContainer.getStyleClass().add("big-vbox");
+        infoText.getStyleClass().add("text-area");
+        infoText.setWrapText(true);
     }
 
     /**
@@ -51,5 +72,16 @@ public class SettingsPane extends BorderPane {
      */
     private void setCallbacks() {
         //TODO
+        returnButton.setOnMouseClicked(event -> SceneManager.getInstance().showMainMenuScene());
+        toggleSoundFXButton.setOnMouseClicked(event -> {
+            AudioManager audioManager = AudioManager.getInstance();
+            if (audioManager.isEnabled()) {
+                audioManager.setEnabled(false);
+                toggleSoundFXButton.setText("Enable sound");
+            } else {
+                audioManager.setEnabled(true);
+                toggleSoundFXButton.setText("Disable sound");
+            }
+        });
     }
 }

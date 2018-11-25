@@ -45,6 +45,24 @@ public class LevelEditorPane extends BorderPane {
      */
     public LevelEditorPane() {
         //TODO
+        levelEditor = new LevelEditorCanvas(5, 5);
+
+        leftContainer = new VBox(20);
+        returnButton = new Button("Return");
+        rowText = new Label("Rows");
+        rowField = new NumberTextField("5");
+        colText = new Label("Cols");
+        colField = new NumberTextField("5");
+        rowBox = new BorderPane();
+        colBox = new BorderPane();
+        newGridButton = new Button("New Grid");
+        brushList = FXCollections.observableArrayList(Brush.values());
+        saveButton = new Button("Save");
+        centerContainer = new VBox(20);
+
+        connectComponents();
+        styleComponents();
+        setCallbacks();
     }
 
     /**
@@ -55,6 +73,16 @@ public class LevelEditorPane extends BorderPane {
      */
     private void connectComponents() {
         //TODO
+        rowBox.setLeft(rowText);
+        rowBox.setRight(rowField);
+        colBox.setLeft(colText);
+        colBox.setRight(colField);
+        selectedBrush.setItems(brushList);
+        selectedBrush.getSelectionModel().selectFirst();
+        leftContainer.getChildren().addAll(returnButton, rowBox, colBox, newGridButton, selectedBrush, saveButton);
+        centerContainer.getChildren().add(levelEditor);
+        this.setLeft(leftContainer);
+        this.setCenter(centerContainer);
     }
 
     /**
@@ -62,6 +90,17 @@ public class LevelEditorPane extends BorderPane {
      */
     private void styleComponents() {
         //TODO
+        this.getStylesheets().add(Config.CSS_STYLES);
+        leftContainer.getStyleClass().add("side-menu");
+        returnButton.getStyleClass().add("big-button");
+        rowField.getStyleClass().add("text-field");
+        colField.getStyleClass().add("text-field");
+        rowBox.getStyleClass().add("text-field");
+        colBox.getStyleClass().add("text-field");
+        selectedBrush.getStyleClass().add("list-cell");
+        newGridButton.getStyleClass().add("big-button");
+        saveButton.getStyleClass().add("big-button");
+        centerContainer.getStyleClass().add("big-vbox");
     }
 
     /**
@@ -76,5 +115,9 @@ public class LevelEditorPane extends BorderPane {
      */
     private void setCallbacks() {
         //TODO
+        saveButton.setOnMouseClicked(event -> levelEditor.saveToFile());
+        newGridButton.setOnMouseClicked(event -> levelEditor.changeSize(rowField.getValue(), colField.getValue()));
+        returnButton.setOnMouseClicked(event -> SceneManager.getInstance().showMainMenuScene());
+        levelEditor.setOnMouseClicked(event -> levelEditor.setTile(selectedBrush.getSelectionModel().getSelectedItem(), event.getX(), event.getY()));
     }
 }

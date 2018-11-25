@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import viewmodel.Config;
 import viewmodel.SceneManager;
 
 /**
@@ -24,6 +25,16 @@ public class MainMenuPane extends BorderPane {
      */
     public MainMenuPane() {
         //TODO
+        container = new VBox(20);
+        title = new Label("Sokoban");
+        playButton = new Button("Play");
+        levelEditorButton = new Button("Level Editor");
+        settingsButton = new Button("About / Settings");
+        quitButton = new Button("Quit");
+
+        connectComponents();
+        styleComponents();
+        setCallbacks();
     }
 
     /**
@@ -46,6 +57,12 @@ public class MainMenuPane extends BorderPane {
      */
     private void styleComponents() {
         //TODO
+        this.getStylesheets().add(Config.CSS_STYLES);
+        container.getStyleClass().add("big-vbox");
+        playButton.getStyleClass().add("big-button");
+        levelEditorButton.getStyleClass().add("big-button");
+        settingsButton.getStyleClass().add("big-button");
+        quitButton.getStyleClass().add("big-button");
     }
 
     /**
@@ -53,5 +70,9 @@ public class MainMenuPane extends BorderPane {
      */
     private void setCallbacks() {
         //TODO
+        playButton.setOnMouseClicked(event -> SceneManager.getInstance().showLevelSelectMenuScene());
+        levelEditorButton.setOnMouseClicked(event -> SceneManager.getInstance().showLevelEditorScene());
+        settingsButton.setOnMouseClicked(event -> SceneManager.getInstance().showSettingsMenuScene());
+        quitButton.setOnMouseClicked(event -> Platform.exit());
     }
 }
